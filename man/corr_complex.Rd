@@ -34,26 +34,64 @@ interpolant.quick.complex(x, d, zold, Ainv, scales = NULL, pos.def.matrix = NULL
 }
 \details{
 
-Function \code{corr_complex()} is the complex analogue of
-\code{corr.matrix()}, but includes only a single method, that of nested
-calls to \code{apply()}.  I could not figure out how to generalize
-method 1 does not have a nice complex generalization (AFAICS).
+\itemize{
 
-Function \code{complex_CF()} returns the characteristic function of a
-complex Gaussian distribution.
+  \item Function \code{complex_CF()} returns a (slightly reparameterized)
+  characteristic function of a complex Gaussian distribution.  The
+  covariance is given by
+  
+  \deqn{c(\mathbf{t}) = \exp(i\mathrm{Re}(\mathbf{t}^\ast\mathbf{\mu}) -
+    \mathbf{t}^\ast B\mathbf{t})}{[omitted, see PDF]}
+  
+  where \eqn{\mathbf{t}=\mathbf{x}-\mathbf{x}'}{x-x'} is interpreted as
+  the distance between two observations, \eqn{\mathbf{\mu}}{mu} is the
+  mean of the distribution (which is in general a complex vector), and
+  \eqn{B} a positive-definite matrix.
+  
+  \item Function \code{corr_complex()} is the complex analogue of
+  \code{corr.matrix()}.  It returns a matrix with entry \eqn{(i,j)}
+  equal to the covariance of the process at observation \eqn{i} and
+  observation \eqn{j}, or
+  \eqn{\mbox{cov}(\eta(\mathbf{x}_i),\eta(\mathbf{x}_j))}{cov(eta(x_i),eta(x_j))}.
+  The elements are calculated by \code{complex_CF()}.
+  
+  This function includes only a single method, that of nested calls to
+  \code{apply()}.  I could not figure out how to generalize method 1 of
+  \code{corr.mattrix()}  to the complex case.
 
-Function \code{scales.likelihood.complex()} is a complex version of
+\item Function \code{scales.likelihood.complex()} is a complex version of
 \code{scales.likelihood()} which takes a positive definite matrix and a
-mean.
+mean.  The formula used is \deqn{(\sigma^2)^{-(n-q)}|A|^{-1}
+|H^TA^{-1}H|^{-1}}{[omitted, see PDF]}
 
-Function \code{interpolant.quick.complex()} is a complex version of
+\item Function \code{interpolant.quick.complex()} is a complex version of
 \code{interpolant.quick()}.
+
+
+\deqn{\mathbf{h}(\mathbf{x})^\ast\hat{\mathbf{\beta}} +
+  \mathbf{t}(\mathbf{x})^\ast A^{-1}(\mathbf{y}-H\hat{\mathbf{\beta}})}{[omitted, see PDF]} 
+
+This is the complex version of Oakley's equation 2.30 or Hankin's
+equation 5.
+
+}
+
+More details are given in the package vignette.
 }
 
 \references{
-Hankin, R. K. S. 2005.  "Introducing BACCO, an R bundle for Bayesian
-Analysis of Computer Code Output", Journal of Statistical Software, 14(15)
+
+  \itemize{
+    \item Hankin, R. K. S. 2005.  \dQuote{Introducing
+      BACCO, an R bundle for Bayesian Analysis of Computer Code Output},
+    \emph{Journal of Statistical Software}, 14(15)
+    
+    \item J. Oakley 1999. \emph{Bayesian uncertainty analysis for complex
+      computer codes}, PhD thesis, University of Sheffield.
+  }
 }
+
+
 \author{
 Robin K. S. Hankin
 }
@@ -84,7 +122,4 @@ interpolant.quick.complex(x=0.1i+V[1:3,],d=z,zold=V,Ainv=Ainv,pos.def.matrix=cs,
 
 
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+
