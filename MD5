@@ -1,0 +1,14 @@
+3d489dd840cbdc2856905d87c6889117 *DESCRIPTION
+668d8e9b2f2c685bb6b545a21644f769 *NAMESPACE
+154bf02f427aac3d3f539c31afaab026 *R/cmvnorm.R
+c2cb28c7a1d1591ea65d6f7af90cc67b *build/vignette.rds
+2578752852d52e1ebd029aa9da43ca47 *inst/doc/complicator.R
+eb4883ede2da9ec576f228ef7d18e2d9 *inst/doc/complicator.Rnw
+92e6e12bc9c005708dbcebcc4ed80101 *inst/doc/complicator.pdf
+cba7a25c45ad3f8dffb891a95554f86f *man/Mvcnorm.Rd
+20e5ab4206731800de72538a39897249 *man/cmvnorm-package.Rd
+d6f6825ca5bee9451ec04b78be39d0b2 *man/corr_complex.Rd
+3536b9bdfe1910b504cd54753ab8ff5e *man/isHermitian.Rd
+b83a7d2eae9e3909fbb42afa30041c5e *man/setreal.Rd
+799152464d39e049971684023611699d *vignettes/complex_gaussian.bib
+eb4883ede2da9ec576f228ef7d18e2d9 *vignettes/complicator.Rnw

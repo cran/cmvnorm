@@ -1,0 +1,487 @@
+% -*- mode: noweb; noweb-default-code-mode: R-mode; -*-
+\documentclass[nojss]{jss}
+\usepackage{dsfont}
+\usepackage{bbm}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% declarations for jss.cls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% just as usual
+\author{Robin K. S. Hankin\\Auckland University of Technology}
+\title{The complex multivariate Gaussian distribuion}
+%\VignetteIndexEntry{A vignette for the cmvnorm package}
+%% for pretty printing and a nice hypersummary also set:
+\Plainauthor{Robin K. S. Hankin}
+
+%% an abstract and keywords
+\Abstract{Here, \pkg{cmvnorm}, a complex generalization of the
+  \pkg{mvtnorm} package is presented.  An application in the context
+  of a complex Gaussian process as fitted to the Weierstrass sigma
+  function is given}
+
+\Keywords{Complex multivariate Gaussian distribution, Gaussian
+  process, Weierstrass sigma function, emulator
+}
+
+%% publication information
+%% NOTE: This needs to filled out ONLY IF THE PAPER WAS ACCEPTED.
+%% If it was not (yet) accepted, leave them commented.
+%% \Volume{13}
+%% \Issue{9}
+%% \Month{September}
+%% \Year{2004}
+%% \Submitdate{2004-09-29}
+%% \Acceptdate{2004-09-29}
+
+%% The address of (at least) one author should be given
+%% in the following format:
+\Address{
+  Robin K. S. Hankin\\
+  Auckland University of Technology\\
+  2-14 Wakefield Street\\
+  Auckland NZ\\
+  \email{hankin.robin@gmail.com}
+}
+%% It is also possible to add a telephone and fax number
+%% before the e-mail in the following format:
+%% Telephone: +43/1/31336-5053
+%% Fax: +43/1/31336-734
+
+%% for those who use Sweave please include the following line (with % symbols):
+%% need no \usepackage{Sweave.sty}
+
+%% end of declarations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\bx}{\mathbf x}
+\newcommand{\bX}{\mathbf X}
+\newcommand{\bt}{\mathbf t}
+\newcommand{\by}{\mathbf y}
+\newcommand{\bw}{\mathbf w}
+\newcommand{\bz}{\mathbf z}
+\newcommand{\bZ}{\mathbf Z}
+\newcommand{\bm}{\boldsymbol\mu}
+\newcommand{\bbeta}{\boldsymbol\beta}
+\newcommand{\bepsilon}{\boldsymbol\epsilon}
+\newcommand{\bzero}{\mathbf 0}
+\newcommand{\mathi}{\mathrm{i}}
+\SweaveOpts{}
+\begin{document}
+\section{Introduction}
+The multivariate Gaussian distribution is well supported
+in~\proglang{R}~\citep{rcore2014,genz2014}, having density function
+
+\begin{equation}\label{real_gaussian_PDF}
+f\left(\bx;\bm,\Sigma\right) = \frac{e^{-\frac{1}{2}\left(\bx-\bm\right)^T\Sigma^{-1}\left(\bx-\bm\right)}}{\sqrt{\left|2\pi\Sigma^{-1}\right|}}\qquad\bx\in\mathbb{R}^n.
+\end{equation}
+
+Here, $\bm=\mathbb{E}\bx\in\mathbb{R}^n$ is the mean vector
+and~$\Sigma=\mathbb{E}\left(\bx-\bm\right)\left(\bx-\bm\right)^T$ the
+variance of random variable~$\bX$; we
+write~$\bX\sim\operatorname{\mathcal{N}}\left(\bm,\Sigma\right)$. One
+natural generalization would be to
+consider~$\bZ\sim\operatorname{\mathcal{N}\mathcal{C}}\left(\bm,\Gamma\right)$,
+the complex multivariate Gaussian, with density function
+
+\begin{equation}\label{complex_Gaussian_PDF}
+f\left(\bz;\bm,\Gamma\right) =
+\frac{e^{-\left(\bz-\bm\right)^\star\Gamma^{-1}\left(\bx-\bm\right)}}{\left|\pi\Gamma^{-1}\right|}\qquad\bz\in\mathbb{C}^n
+\end{equation}
+
+where $\bz^\star$ denotes the Hermitian transpose of complex
+vector~$\bz$.  Now~$\bm\in\mathbb{C}^n$ is the complex mean
+and~$\Gamma=\mathbb{E}\left(\bZ-\bm\right)\left(\bZ-\bm\right)^\star$
+is the complex variance; $\Gamma$ is a Hermitian positive definite
+matrix.  Note the simpler form of equation~\ref{complex_Gaussian_PDF},
+essentially due to Gauss's integral operating more cleanly over the
+complex plane than the real line:
+
+\[
+\int_\mathbb{C}e^{-z^\star z}\,dz=
+\int_{x\in\mathbb{R}}\int_{y\in\mathbb{R}}e^{-\left(x^2+y^2\right)}\,dx\,dy=
+\int_{\theta=0}^{2\pi}\int_{r=0}^\infty e^{-r^2}r\,dr\,d\theta=\pi.
+\]
+
+%That the variance of this distribution
+%is~$\Gamma=\mathbb{E}\left(\bz-\bm\right)\left(\bz-\bm\right)^\star$
+%follows directly from the definition of expectation:
+%\[
+%\mathbb{E}z^\star z=
+%\int_\mathbb{C}z^\star z e^{-z^\star z}\,dz=
+%\int_{\theta=0}^{2\pi}\int_{r=0}^\infty r^2e^{-r^2}r\,dr\,d\theta
+%\]
+
+A zero mean complex random vector~$\bZ$ is said to be {\em circularly
+  symmetric}~\citep{goodman1963} if~$\mathbb{E}\bZ\bZ^T=\bzero$, or
+equivalently~$\bZ$ and~$e^{i\alpha}\bZ$ have identical distributions
+for any~$\alpha\in\mathbb{R}$.  Equation~\ref{complex_Gaussian_PDF}
+clearly has this property.
+
+Most results from real multivariate analysis have a direct
+generalization to the complex case, as long as ``transpose'' is
+replaced by ``Hermitian transpose''.  For example,
+$\bX\sim\mathcal{N}\left(\bzero,\Sigma\right)$ implies
+$B\bX\sim\mathcal{N}\left(\bzero,B^T\Sigma B\right)$ for any constant
+matrix~$B$, and analogously $\bZ\sim\mathcal{NC}\left(\bzero,
+\Gamma\right)$ implies~$B\bZ\sim\mathcal{NC}\left(\bzero,B^\star\Gamma
+B\right)$.  Similar generalizations operate for Schur complement
+methods on partitioned matrices.
+
+Also, linear regression works without modification.  Specifically,
+consider~$\by\in\mathbb{R}^n$.  If~$\by=X\bbeta+\bepsilon$ where~$X$
+is a~$n\times p$ design matrix, $\bbeta\in\mathbb{R}^p$ a vector of
+regression coefficients
+and~$\bepsilon\sim\mathcal{N}\left(0,\sigma^2A\right)$ is a vector of
+errors, then~$\hat{\bbeta} = \left(X^TA^{-1}X\right)X^TA^{-1}\by$ is
+the maximum likelihood estimator for~$\bbeta$.  The complex
+generalization is~$\hat{\bbeta} = \left(X^\star
+A^{-1}X\right)^{-1}X^\star A^{-1}\bz$, where~$A$ itself may be
+complex.
+
+This short vignette introduces the \pkg{cmvnorm} package which
+furnishes some functionality for the complex multivariate Gaussian
+distribution, and applies it in the context of a complex generalization
+of the \pkg{emulator} package.
+
+
+
+\section{The package in use}
+
+Random complex vectors are generated using the \code{rcmvnorm()}
+function, analogous to \code{rmvnorm()}:
+
+
+<<use_rcmvnorm>>=
+set.seed(1)
+require(cmvnorm,quietly=TRUE)
+cm <- c(1,1i)
+cv <- matrix(c(2,1i,-1i,2),2,2)
+(z <- rcmvnorm(6, mean=cm, sigma=cv))
+@ 
+
+Function \code{dcmvnorm()} returns the density according to
+equation~\ref{complex_Gaussian_PDF}:
+
+
+<<use_dcmvnorm>>=
+dcmvnorm(z,cm,cv)
+@ 
+
+So it is possible to determine a maximum likelihood for the mean
+using direct numerical optimization
+
+<<simpleoptimization>>=
+helper <- function(x){c(x[1]+1i*x[2], x[3]+1i*x[4])}
+objective <- function(x){-sum(dcmvnorm(z,mean=helper(x),sigma=cv,log=TRUE))}
+optim(c(1,0,1,0),objective)$par
+@ 
+
+(helper functions are needed because \code{optim()} optimizes
+over~$\mathbb{R}^n$).  This shows reasonable agreement with the true
+value of the mean and indeed the analytic value of the MLE,
+specifically
+
+<<colmeansusage>>=
+colMeans(z)
+@ 
+
+
+\section{The Gaussian process}
+
+In the context of the emulator, a (real) Gaussian process is usually
+defined in terms of a random
+function~$\eta\colon\mathbb{R}^p\longrightarrow\mathbb{R}$ which, for any
+set of points~$\left\{\bx_1,\ldots,\bx_n\right\}$ in its domain the
+random
+vector~$\left\{\eta\left(\bx_1\right),\ldots,\eta\left(\bx_n\right)\right\}$
+is multivariate Gaussian.
+
+It is convenient to define means and variances as
+$\left.\mathbb{E}\eta\left(\bx\right)\right|\bbeta=h\left(\bx\right)\bbeta$,
+conditional on the (unknown) vector of coefficients~$\bbeta$
+and~$h\left(\cdot\right)$, the~$q$ known regressor functions
+of~$\bx=\left(x_1,\ldots,x_p\right)^T$; a common choice
+is~$h\left(\bx\right)=\left(1,x_1,\ldots,x_p\right)^T$, but one is free to choose
+any function of~$\bx$.  The covariance is typically given by
+\[
+\COV\left(\eta(\bx),\eta(\bx')\right)=V\left(\bx-\bx'\right)
+\]
+
+where~$V\colon\mathbb{R}^n\longrightarrow\mathbb{R}$ must be chosen so
+that the variance matrix of any finite set of observations is always
+positive-definite.  Bochner's theorem~\cite[chapter XIX]{feller1971}
+shows that~$V\left(\cdot\right)$ must be proportional to the
+characteristic function of a symmetric probability Borel measure.
+
+\subsection{Complex Gaussian processes}
+
+The complex case is directly analogous,
+with~$\eta\colon\mathbb{C}^p\longrightarrow\mathbb{C}$
+and~$\bbeta\in\mathbb{C}^q$.
+Writing~$\COV\left(\eta\left(\bz_1\right),\ldots,\eta\left(\bz_n\right)\right)=\Omega$,
+so that element $(i,j)^\mathrm{th}$ of matrix~$\Omega$
+is~$\COV\left(\eta\left(\bz_i\right),\ldots,\eta\left(\bz_j\right)\right)$,
+we may relax the reqirement that~$\Omega$ be symmetric positive definite
+to requiring only Hermitian positive definiteness.  This allows one to
+use the characteristic function of {\em any}, possibly non-symmetric,
+random variable with support over~$\mathbb{C}^p$.  That~$\Omega$ remains
+Hermitian positive definite may be shown by evaluating a quadratic
+form with it and~$\bw\in\mathbb{C}^n$ and establishing that it is real
+and non-negative:
+
+\begin{align*}
+  \bw^\star\Omega\bw&=
+   \sum_{i,j}\overline{\bw_i}\COV\left(\eta\left(\bx_i\right),\eta\left(\bx_j\right)\right){\bw_j}\\
+&= \sum_{i,j}\overline{\bw_i}\left[\int_{\bt\in\mathbb{C}^n}e^{\mathi\operatorname{Re}\bt^\star(\bx_i-\bx_j)}\operatorname{Pr}\left(\bt\right)\,d\bt\right]{\bw_j}\\
+&= \int_{\bt\in\mathbb{C}^n}\left[\sum_{i,j}\overline{\bw_i}e^{\mathi\operatorname{Re}\bt^\star(\bx_i-\bx_j)}{\bw_j}\operatorname{Pr}\left(\bt\right)\right]\,d\bt\\
+&= \int_{\bt\in\mathbb{C}^n}\left[\sum_{i,j}\overline{\bw_i}e^{\mathi\operatorname{Re}(\bt^\star\bx_i)}\overline{\overline{\bw_j}e^{\mathi\operatorname{Re}(\bt^\star\bx_j)}}\operatorname{Pr}\left(\bt\right)\right]\,d\bt\\
+&= \int_{\bt\in\mathbb{C}^n}\left|\sum_{i}\overline{\bw_i}e^{\mathi\operatorname{Re}(\bt^\star\bx_i)}\right|^2 \operatorname{Pr}\left(\bt\right)\,d\bt\\
+&\geqslant 0.
+\end{align*}
+
+This motivates the characteristic function of a complex multivariate
+random variable~${\mathbf Z}$ is defined as~$\mathbb{E}
+e^{i\operatorname{Re}\left(\bt^\star{\mathbf Z}\right)}$.  Thus the
+covariance matrix is Hermitian positive definite: although its entries
+are not necessarily real, its eigenvalues are all nonnegative.
+
+In the real case one typically chooses~$V\left(\cdot\right)$ to be the
+characteristic function of a Gaussian distribution; in the complex
+case one can use the complex multivariate
+distribution~\ref{complex_Gaussian_PDF} which has characteristic function
+
+\begin{equation}\label{complex_gaussian_CF}
+\exp\left(i\operatorname{Re}\left(\bt^\star\bm\right) -
+\frac{1}{4}\bt^\star\Gamma\bt\right)
+\end{equation}
+
+and following~\cite{hankin2012} in writing~$\mathfrak{B}=\Gamma/4$, we
+can write the variance matrix as a product of a (real) scalar~$\sigma^2$ term and
+
+\begin{equation}\label{ct}
+c\left(\bt\right) = \exp\left(i\operatorname{Re}\left(\bt^\star\bm\right) -
+\bt^\star\mathfrak{B}\bt\right).
+\end{equation}
+
+In equation~\ref{ct}, $\mathfrak{B}$ has the same meaning as in
+conventional emulator techniques and controls the modulus of the
+covariance between~$\eta\left(\bz\right)$ and~$\eta\left(\bz'\right)$;
+$\bm$ governs the phase.
+
+Given the above, it seems to be reasonable to follow~\cite{oakley1999}
+and admit only diagonal~$\mathfrak{B}$; but now distributions with
+nonzero mean can be considered.  Such a parametrization gives~$3p$
+(real) hyperparameters; compare~$2p$ if~$\mathbb{C}^p$ is identified
+with~$\mathbb{R}^{2p}$.
+
+\section{Functions of several complex variables}
+
+Analytic functions of several complex variables are an important and
+interesting class of objects; \cite{krantz1987} motivates and
+discusses the discipline.  Formally,
+consider~$f\colon\mathbb{C}^n\longrightarrow\mathbb{C}$, $n\geqslant
+2$ and write~$f\left(z_1,\ldots,z_n\right)$.  Function~$f$ is {\em
+  analytic} if it satisfies the Cauchy-Riemann conditions in each
+variable separately, that is~$\partial f/\partial\overline{z}_j=0$,
+$1\leqslant j\leqslant n$.
+
+Such an~$f$ is continuous (due to a ``non-trivial theorem of
+Hartogs'') and continuously differentiable to arbitrarily high order.
+\citeauthor{krantz1987} goes on to state some results which are
+startling if one's exposure to complex analysis is restricted to
+functions of a single variable: for example, any isolated singularity
+is removable.
+
+%\begin{itemize}
+%\item Any isolated singularity is removable
+%\item If~$\Omega\subseteq\mathbb{C}^n$ is bounded, and~$f$ is
+%  continuous on the closure~$\overline{\Omega}$ of~$\Omega$, then the
+%  image of~$\left.f\right|_{\partial\Omega}$ contains the full image
+%  of~$f$ on~\overline{\Omega}$.
+%\end{itemize}
+
+
+\section{Numerical illustration of these ideas}
+
+
+The natural definition of complex Gaussian process above, together
+with the features of analytic functions of several complex variables,
+suggests that a complex emulation of analytic functions of several
+complex variables might be a useful technique.
+
+The ideas presented above, and the \pkg{cmvnorm} package, can now be
+used to sample directly from an appropriate complex gaussian
+distribution and estimate the roughness parameters:
+
+
+<<definelatinhypercube>>=
+val <- latin.hypercube(40,2,names=c('a','b'),complex = TRUE)
+head(val)
+@ 
+
+and now specify a variance matrix using simple values for the
+roughness hyperparameters~$\mathfrak{B}=\left(\begin{smallmatrix}1&0\\0&2\end{smallmatrix}\right)$
+and~$\bm=\left(1,i\right)^T$:
+
+<<workoutA>>=
+true_scales <- c(1,2)
+true_means <- c(1,1i)
+A <- corr_complex(val, means=true_means, scales=true_scales)
+round(A[1:4,1:4],2)
+@ 
+
+Function \code{corr\_complex()} is a complex generalization of \code{corr()}; matrix \code{A} is Hermitian positive-definite.  It is now
+possible to make a single multivariate observation~$d$ of this
+process, using~$\bbeta=\left(1,1+i,1-2i\right)^T$:
+
+<<makesinglesample>>=
+true_beta <- c(1,1+1i,1-2i)
+d <- drop(rcmvnorm(n=1,mean=regressor.multi(val) %*% true_beta,sigma=A))
+head(d)
+@ 
+
+thus \code{d} is a single observation from a complex multivariate
+Gaussian distribution.  Most of the functions of the \pkg{emulator}
+package operate without modification:
+
+<<estimatebetahat>>=
+betahat.fun(val,solve(A),d)
+@ 
+
+but the \code{interpolant()} functionality is implemented in the
+\pkg{cmvnorm} package (the likelihood function is different).  So for
+example it is possible to evaluate the posterior distribution of the
+process at $(0.5,0.3+0.1i)$, a point at which no observation has been
+made:
+
+<<secondinterp>>=
+interpolant.quick.complex(rbind(c(0.5,0.3+0.1i)),d,
+    val,solve(A),scales=true_scales,means=true_means,give.Z=TRUE)
+@ 
+
+Thus the posterior distribution for the process at this point is
+Gaussian with a mean of about~$1.73+1.03i$ and a variance of
+about~$0.16$.
+
+
+\subsection{Analytic functions}
+
+These techniques are now used to emulate an analytic function
+of several complex variables.  A complex function's being analytic is
+a very strong restriction; \cite{needham2004} uses `rigidity' to
+describe the severe constraint that analyticity represents.
+
+Here the Weierstrass sigma function is chosen as an example, on the
+grounds that Littlewood considers the $\sigma$-function to be
+a ``typical'' entire function.  The elliptic package~\citep{hankin2006}
+is used for numerical evaluation.  The~$\sigma$-function takes a
+primary argument~$z$ and two invariants~$g_1,g_2$, so a three-column
+complex design matrix is required:
+
+<<setupelliptic>>=
+require("emulator")
+require("elliptic")
+valsigma <- 
+    2+1i + round(latin.hypercube(30,3,names=c("z","g1","g2"),complex=TRUE)/4,2)
+head(valsigma)
+@
+
+An offset to \code{latin.hypercube()} is needed
+because~$\sigma\left(z,g_1,g_2\right)=z+\operatorname{\mathcal{O}}\left(z^5\right)$.
+The sigma function can now be evaluated at the points on the design
+matrix:
+
+<<samplefromsigma>>=
+dsigma <- apply(valsigma,1,function(u){sigma(u[1],g=u[2:3])})
+@ 
+
+Function \code{scales.likelihood.complex()} can be used to return the
+log-likelihood for a specific set of roughness parameters:
+
+<<evaluatelikelihood>>=
+scales.likelihood.complex(scales=c(1,1,2),means=c(1,1+1i,1-2i),
+                          zold=valsigma,z=dsigma,give_log=TRUE)
+@ 
+
+Numerical methods can then be used to find the maximum likelihood
+estimate.  Because function \code{optim()} optimizes
+over~$\mathbb{R}^n$, helper functions are again needed which translate
+from the optimand to scales and means:
+<<translatorfunctionse>>=
+scales <- function(x){exp(x[c(1,2,2)])}
+means <-  function(x){x[c(3,4,4)] + 1i*x[c(5,6,6)]}
+@ 
+
+Because the diagonal elements of~$\mathfrak{B}$ are strictly positive,
+their {\em logarithms} are optimized, following~\cite{hankin2005}; it
+is implicitly assumed that the scales and means associated with~$g_1$
+and~$g_2$ are equal.
+
+<<useoptimhere>>=
+objective <- function(x){
+ -scales.likelihood.complex(scales=scales(x),means=means(x),zold=valsigma,z=dsigma)
+}
+
+start <- 
+    c(-0.538, -5.668, 0.6633, -0.0084, -1.73, -0.028)
+jj <- optim(start,objective,method="SANN",control=list(maxit=100))
+(u <- jj$par)
+Asigma <- corr_complex(z1=valsigma,scales=scales(u),means=means(u))
+@ 
+
+
+So now we can compare the emulator against the ``true'' value:
+
+<<testrealvalue>>=
+
+interpolant.quick.complex(rbind(c(2+1i,2+1i,2+1i)), zold=valsigma,
+    d=dsigma,Ainv=solve(Asigma),scales=scales(u),means=means(u))
+
+sigma(2+1i,g=c(2+1i,2+1i))
+@ 
+
+showing reasonable agreement.  It is also possible to test the
+hypothesis~$H_\mathbb{R}$ that the variance matrix~$A$ is real, by
+calculating the likelihood ratio of the full model~\ref{ct} and that
+obtained by~$H_\mathbb{R}$, that is, performing the optimization
+constrained so that~$\bm\in\mathbb{R}^2$:
+
+<<objectiverealvariancematrix>>=
+ob2 <- function(x){
+    -scales.likelihood.complex(scales=scales(x),means=c(0,0,0),zold=valsigma,z=dsigma)
+}
+jjr <- optim(u[1:2],ob2,method="SANN",control=list(maxit=1000))
+(ur <- jjr$par)
+@ 
+
+so the test statistic~$D$ is given by
+<<likelihoodratiotestforrealA>>=
+LR <- scales.likelihood.complex(scales=scales(ur),means=c(0,0,0),zold=valsigma,z=dsigma)
+LC <- scales.likelihood.complex(scales=scales(u),means=means(u),zold=valsigma,z=dsigma)
+(D <- 2*(LC-LR))
+@ 
+
+Observing that~$D$ is in the tail region of its asymptotic
+distribution, $\chi^2_{3}$, the hypothesis~$H_\mathbb{R}$ may be
+rejected.
+
+
+\section{Conclusions}
+
+The \pkg{cmvnorm} package for the complex multivariate Gaussian
+distribution has been introduced and motivated.  The Gaussian proces
+has been generalized to the complex case, and a complex generalization
+of the emulator technique has been applied to an analytic function of
+several complex variables.  The complex variance matrix was specified
+using a novel parameterization which accommodated non-real covariances
+in the context of circulary symmetric random variables.  Further work
+might include numerical support for the complex multivariate Student
+$t$~distribution.
+
+
+\bibliography{complex_gaussian}
+\end{document}
