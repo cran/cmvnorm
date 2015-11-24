@@ -239,3 +239,34 @@ function(pos.def.matrix, scales, means,  zold, z,  give_log = TRUE, func = regre
         return(exp(out))
     }
 }
+
+"sd" <- function(x, na.rm = FALSE) {
+  UseMethod("sd", x)  # thanks go to Kirill Mueller for advice
+}
+
+sd.complex <- function(x, na.rm = FALSE) {
+    sqrt(drop(var(c(x),na.rm=na.rm)))
+}
+
+
+sd.default  <- stats::sd
+var.default <- stats::var
+
+"var" <- function(x,y=NULL,na.rm=FALSE,use){
+    UseMethod("var",x)
+}
+
+"var.complex" <- function(x, y=NULL, na.rm = FALSE, use){
+    if(na.rm){x <- x[!is.na(rowSums(x)),]}
+    
+    x <- as.matrix(x)
+    x <- sweep(x,2,colMeans(x))
+    if(is.null(y)){
+       return(drop(zapim(cprod(x))/(nrow(x)-1)))
+    } else {
+       y <- as.matrix(y)
+       if(na.rm){y <- y[!is.na(rowSums(y)),]}
+       y <- sweep(y,2,colMeans(y))
+       return(drop(zapim(cprod(x,y))/(nrow(x)-1)))
+    }
+}

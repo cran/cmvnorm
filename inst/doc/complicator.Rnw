@@ -163,8 +163,10 @@ Gaussian process.
 
 This short vignette introduces the \pkg{cmvnorm} package which
 furnishes some functionality for the complex multivariate Gaussian
-distribution, and applies it in the context of a complex generalization
-of the \pkg{emulator} package.
+distribution, and applies it in the context of a complex
+generalization of the \pkg{emulator} package~\citep{hankin2005}, which
+implements functionality for investigating (real) Gaussian processes.
+
 
 
 
@@ -189,7 +191,7 @@ to~(\ref{complex_Gaussian_PDF}):
 dcmvnorm(z,cm,cv)
 @ 
 
-So it is possible to determine a maximum likelihood for the mean
+So it is possible to determine a maximum likelihood estimate for the mean
 using direct numerical optimization
 
 <<simpleoptimization>>=
@@ -211,7 +213,7 @@ colMeans(z)
 \section{The Gaussian process}
 
 In the context of the emulator, a (real) Gaussian process is usually
-defined in terms of a random
+defined as a random
 function~$\eta\colon\mathbb{R}^p\longrightarrow\mathbb{R}$ which, for
 any set of points~$\left\{\bx_1,\ldots,\bx_n\right\}$ in its
 domain~${\mathcal D}$ the random
@@ -282,7 +284,7 @@ characteristic function~$\phi$:
 \begin{equation}
   \Omega_{ij}=
   \COV\left(\eta\left(\bz_i\right),\eta\left(\bz_j\right)\right) = 
-  \phi\left(\bz_i-\bz_j\right)
+  \phi\left(\bz_i-\bz_j\right).
 \end{equation}
 
 That~$\Omega$ remains Hermitian positive definite may be shown by
@@ -355,9 +357,10 @@ $\bm$ governs the phase.
 
 Given the above, it seems to be reasonable to follow~\cite{oakley1999}
 and admit only diagonal~$\mathfrak{B}$; but now distributions with
-nonzero mean can be considered.  Such a parametrization gives~$3p$
-(real) hyperparameters; compare~$2p$ if~$\mathbb{C}^p$ is identified
-with~$\mathbb{R}^{2p}$.
+nonzero mean can be considered (compare the real case which requires a
+zero mean).  A parametrization using diagonal~$\mathfrak{B}$ and
+complex mean vector requires~$3p$ (real) hyperparameters; compare~$2p$
+if~$\mathbb{C}^p$ is identified with~$\mathbb{R}^{2p}$.
 
 \section{Functions of several complex variables}
 
@@ -389,13 +392,13 @@ is removable.
 \section{Numerical illustration of these ideas}
 
 
-The natural definition of complex Gaussian process above, together
+The natural definition of complex Gaussian processes above, together
 with the features of analytic functions of several complex variables,
 suggests that a complex emulation of analytic functions of several
 complex variables might be a useful technique.
 
 The ideas presented above, and the \pkg{cmvnorm} package, can now be
-used to sample directly from an appropriate complex gaussian
+used to sample directly from an appropriate complex Gaussian
 distribution and estimate the roughness parameters:
 
 <<definelatinhypercube>>=
@@ -434,7 +437,7 @@ d <- drop(rcmvnorm(n=1,mean=regressor.multi(val) %*% true_beta,sigma=A))
 head(d)
 @ 
 
-thus \code{d} is a single observation from a complex multivariate
+Thus \code{d} is a single observation from a complex multivariate
 Gaussian distribution.  Most of the functions of the \pkg{emulator}
 package operate without modification.  Thus \code{betahat.fun()},
 which calculates the maximum likelihood
