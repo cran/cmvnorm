@@ -3,9 +3,7 @@
 \alias{complex_CF}
 \alias{interpolant.quick.complex}
 \alias{scales.likelihood.complex}
-\title{
-Various utilities for complex emulation
-}
+\title{Complex Gaussian processes}
 \description{
 Various utilities for investigating complex Gaussian processes
 }
@@ -62,11 +60,11 @@ interpolant.quick.complex(x, d, zold, Ainv, scales = NULL, pos.def.matrix = NULL
 \item Function \code{scales.likelihood.complex()} is a complex version of
 \code{scales.likelihood()} which takes a positive definite matrix and a
 mean.  The formula used is \deqn{(\sigma^2)^{-(n-q)}|A|^{-1}
-|H^TA^{-1}H|^{-1}}{[omitted, see PDF]}
+|H^\ast A^{-1}H|^{-1}}{[omitted, see PDF]}.  Here and elsewhere,
+\eqn{A^\ast}{A^*} means the complex conjugate of the transpose.
 
 \item Function \code{interpolant.quick.complex()} is a complex version of
 \code{interpolant.quick()}.
-
 
 \deqn{\mathbf{h}(\mathbf{x})^\ast\hat{\mathbf{\beta}} +
   \mathbf{t}(\mathbf{x})^\ast A^{-1}(\mathbf{y}-H\hat{\mathbf{\beta}})}{[omitted, see PDF]} 

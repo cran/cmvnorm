@@ -3,43 +3,51 @@
 \alias{cmvnorm}
 \docType{package}
 \title{
-The complex multivariate Gaussian distribution
+\packageTitle{cmvnorm}
 }
 \description{
-Various utilities for investigating the complex generalization of the
-multivariate Gaussian distribution
+\packageDescription{cmvnorm}
 }
 \details{
-\tabular{ll}{
-Package: \tab cmvnorm\cr
-Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2014-01-10\cr
-License: \tab GPL-2\cr
+
+The DESCRIPTION file:
+\packageDESCRIPTION{cmvnorm}
+\packageIndices{cmvnorm}
+
+Generalizing the real multivariate Gaussian distribution to the complex
+case is not straightforward but one common approach is to replace the
+real symmetric variance matrix with a Hermitian positive-definite
+matrix.  The \pkg{cmvnorm} package provides some functionality for
+the resulting density function.
 }
 
-
-
-}
 \author{
-Robin K. S.Hankin; much of the code is inspired by the mvtnorm package
+\packageAuthor{cmvnorm}
 
-Maintainer: \email{hankin.robin@gmail.com}
+Maintainer: \packageMaintainer{cmvnorm}
 }
-
 \references{
-N. R. Goodman 1963.  \dQuote{Statistical analysis based on a certain
-  multivariate complex Gaussian distribution}.  \emph{The Annals of
-  Mathematical Statistics}.  34(1): 152--177
+  \itemize{
+    \item N. R. Goodman 1963.  \dQuote{Statistical analysis based on a certain
+      multivariate complex Gaussian distribution}.  \emph{The Annals of
+      Mathematical Statistics}.  34(1): 152--177
+    \item R. K. S. Hankin 2015.  \dQuote{The complex multivariate
+      Gaussian distribution}.  \emph{R News}, volume 7, number 1.
+  }
 }
-
 \keyword{ package }
-
 \examples{
 
-Covmat <- matrix(c(1,0.1i,-0.1i,1),2,2)
-rcmvnorm(10,sigma=Covmat)
-dcmvnorm(emulator::latin.hypercube(5,2,complex=TRUE),sigma=Covmat)
+
+S1 <- 4+diag(5)
+S2 <- S1
+S2[1,5] <- 4+1i
+S2[5,1] <- 4-1i   # Hermitian
+
+
+rcmvnorm(10,sigma=S1)
+rcmvnorm(10,mean=rep(1i,5),sigma=S2)
+
+dcmvnorm(rep(1,5),sigma=S2)
 
 }
-
