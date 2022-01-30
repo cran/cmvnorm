@@ -1,4 +1,4 @@
-### R code from vignette source 'complicator.Rnw'
+### R code from vignette source 'cmvnorm.Rnw'
 
 ###################################################
 ### code chunk number 1: use_rcmvnorm

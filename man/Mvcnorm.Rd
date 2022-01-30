@@ -24,14 +24,13 @@ rcmvnorm(n, mean = rep(0, nrow(sigma)), sigma = diag(length(mean)),
   \item{mean}{Mean vector}
   \item{sigma}{Covariance matrix, Hermitian positive-definite}
   \item{tol}{numerical tolerance term for verifying positive definiteness}
-  \item{log}{In \code{dcmvnorm()}, Boolean with default \code{TRUE}
-    meaning to return the Gaussian density function, and \code{FALSE}
+  \item{log}{In \code{dcmvnorm()}, Boolean with default \code{FALSE}
+    meaning to return the Gaussian density function, and \code{TRUE}
     meaning to return the logarithm}
-  \item{method}{
-    Matrix decomposition used to determine the positive-definite matrix
-    square root of \code{sigma}, possible methods are eigenvalue
-    decomposition (\dQuote{\code{eigen}}, default), and singular value
-    decomposition (\dQuote{\code{svd}})}
+  \item{method}{Specifies the decomposition used to determine the
+    positive-definite matrix square root of \code{sigma}.  Possible
+    methods are eigenvalue decomposition (\dQuote{\code{eigen}},
+    default), and singular value decomposition (\dQuote{\code{svd}})}
 }
 \details{
   Function \code{dcmvnorm()} is the density function of the complex
@@ -40,7 +39,6 @@ rcmvnorm(n, mean = rep(0, nrow(sigma)), sigma = diag(length(mean)),
   \deqn{p\left(\mathbf{z}\right)=\frac{\exp\left(-\mathbf{z}^*\Gamma\mathbf{z}\right)}{\left|\pi\Gamma\right|}}{
     p(z)=exp(-z*\Gamma z)/|\pi\Gamma|}
     
-  
   Function \code{rcnorm()} is a low-level function designed to generate
   observations drawn from a standard complex Gaussian.  Function
   \code{rcmvnorm()} is a user-friendly wrapper for this.
@@ -50,9 +48,7 @@ N. R. Goodman 1963.  \dQuote{Statistical analysis based on a certain
   multivariate complex Gaussian distribution}.  \emph{The Annals of
   Mathematical Statistics}.  34(1): 152--177
 }
-\author{
-  Robin K. S. Hankin
-}
+\author{Robin K. S. Hankin}
 \examples{
 
 S <- emulator::cprod(rcmvnorm(3,mean=c(1,1i),sigma=diag(2)))
